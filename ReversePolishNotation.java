@@ -1,8 +1,4 @@
- import java.util.Scanner;
- import java.util.List;
- import java.util.ArrayList;
- import java.util.Stack;
- import java.util.*; //collections import
+ import java.util.*; 
  import java.lang.Character.*;
 
  public class ReversePolishNotation
