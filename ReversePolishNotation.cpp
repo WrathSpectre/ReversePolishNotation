@@ -5,6 +5,7 @@
 #include <map>
 #include <sstream>
 #include <algorithm>
+#include <cmath>
 using namespace std;
 
 vector<string> parseEquation(const string equation);
@@ -118,9 +119,10 @@ vector<string> parseEquation(const string equation)
             operands.pop();
 
             if(V == "+") buffer = num_1 + num_2;
-            else if(V == "-") buffer = num_2 - num_1;
-            else if(V == "*") buffer = num_1 * num_2;
-            else if(V == "/") buffer = num_2 / num_1;
+          	else if(V == "-") buffer = num_2 - num_1;
+          	else if(V == "*") buffer = num_1 * num_2;
+          	else if(V == "/") buffer = num_2 / num_1;
+            else if(V == "^") buffer = pow(num_2, num_1);
 
             operands.push(buffer);
         }
