@@ -1,14 +1,14 @@
 #include <iostream>
-#include <stack>
 #include <array>
+#include <stack>
 #include <vector>
-#include <algorithm>
+#include <map>
 #include <sstream>
+#include <algorithm>
 using namespace std;
 
-string parseEquation(const string equation);
-unsigned getPrecedence(const char sign);
-void evaluateEquation(vector<string> postfix);
+vector<string> parseEquation(const string equation);
+int evaluateEquation(const vector<string> postfix);
 
 int main()
 {
@@ -17,26 +17,22 @@ int main()
     cout << "Type equation: ";
     cin >> equation;
 
-    parseEquation(equation);
+    vector<string> postfix = parseEquation(equation);
+    int result = evaluateEquation(postfix);
 
+    cout << result;
 }
 
-unsigned getPrecedence(const char sign)
-{
-    switch(sign)
-    {
-      case '+': return 1;
-      case '-': return 1;
-      case '*': return 2;
-      case '/': return 2;
-      case '^': return 3;
-      default: return 0;
-    }
-}
-
-string parseEquation(const string equation)
+vector<string> parseEquation(const string equation)
 {
     const array<char, 7> operators = {'+', '-', '*', '/', '^', '(', ')'};
+
+    map<char, int> precedence;
+    precedence.insert(pair<char, int> ('+', 1));
+    precedence.insert(pair<char, int> ('-', 1));
+    precedence.insert(pair<char, int> ('*', 2));
+    precedence.insert(pair<char, int> ('/', 2));
+    precedence.insert(pair<char, int> ('^', 3));
 
     vector<string> postfix;
     stack<char> operands;
@@ -45,25 +41,26 @@ string parseEquation(const string equation)
 
     for(unsigned i = 0; i < equation.length(); i++)
     {
-      if(find(operators.begin(), operators.end(), equation[i]) != operators.end() == false)
+      if(find(operators.begin(), operators.end(), equation[i]) == operators.end())
           buffer += equation[i];
 
       else if(equation[i] == '(')
-      {
           operands.push('(');
-      }
 
       else if(equation[i] == ')')
       {
-          if(buffer.length() >0){ postfix.push_back(buffer);
-          buffer = "";}
+          if(buffer.length() > 0)
+          {
+              postfix.push_back(buffer);
+              buffer = "";
+          }
 
           while(operands.empty() || operands.top() != '(')
           {
-            buffer = operands.top();
-            postfix.push_back(buffer);
-            operands.pop();
-            buffer = "";
+              buffer = operands.top();
+              postfix.push_back(buffer);
+              operands.pop();
+              buffer = "";
           }
 
           operands.pop();
@@ -71,12 +68,14 @@ string parseEquation(const string equation)
 
       else
       {
-        if(buffer.length() >0){ postfix.push_back(buffer);
-        buffer = "";}
+          if(buffer.length() > 0)
+          {
+              postfix.push_back(buffer);
+              buffer = "";
+          }
 
           while(operands.empty() == false && operands.top() != '(' && [&](char a, char b)-> bool {
-              return getPrecedence(a) >= getPrecedence(b) ? true : false;
-              } (operands.top(), equation[i]))
+              return precedence.at(a) >= precedence.at(b) ? true : false;} (operands.top(), equation[i]))
           {
               buffer = operands.top();
               postfix.push_back(buffer);
@@ -99,253 +98,42 @@ string parseEquation(const string equation)
         buffer = "";
     }
 
-    for(auto V: postfix)
-    {
-      cout<<"> "<<V<<endl;
-    }
-
-    cout<<endl<<endl;
-
-    evaluateEquation(postfix);
+    return postfix;
 }
 
-int PerformOperation(string operation, int operand1, int operand2)
-{
-	if(operation == "+") return operand1 + operand2;
-	else if(operation == "-") return operand2 - operand1;
-	else if(operation == "*") return operand1 * operand2;
-	else if(operation == "/") return operand2 / operand1;
-
-	else cout<<"Unexpected Error \n";
-	return -1;
-}
-
- void evaluateEquation(vector<string> postfix)
+ int evaluateEquation(const vector<string> postfix)
  {
     const array<string, 5> operators = {"+", "-", "*", "/", "^"};
 
     stack<int> operands;
-
-    //stringstream convert;
-    int buffer = 0;
+    int num_1, num_2, buffer;
 
     for(auto V: postfix)
     {
-
-
-
-      if(V == "+" || V == "-" || V == "*" || V == "/")
+        if(find(operators.begin(), operators.end(), V) != operators.end())
         {
-            int a = operands.top();
+            num_1 = operands.top();
             operands.pop();
-            int b = operands.top();
+            num_2 = operands.top();
             operands.pop();
 
-            int res = PerformOperation(V, a, b);
+            if(V == "+") buffer = num_1 + num_2;
+            else if(V == "-") buffer = num_2 - num_1;
+            else if(V == "*") buffer = num_1 * num_2;
+            else if(V == "/") buffer = num_2 / num_1;
 
-            operands.push(res);
+            operands.push(buffer);
         }
 
         else
         {
-          //Scout<<V<<endl;
-          stringstream convert;
-          convert << V;
-          convert >> buffer;
-          //cout<<buffer<<endl;
+            stringstream convert;
+            convert << V;
+            convert >> buffer;
 
-          operands.push(buffer);
+            operands.push(buffer);
         }
     }
 
-    cout<<operands.top()<<endl;
+    return operands.top();
  }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /*for(const auto V: postfix)
-    {
-        if(find(operators.begin(), operators.end(), V) != operators.end() == false)
-        {
-          stringstream convert;
-          convert << V;
-          convert >> buffer;
-          cout<<buffer<<endl;
-          operands.push(buffer);
-        }
-
-        else
-        {
-          if(V == "+")
-          {
-            val_1 = operands.top();
-            operands.pop();
-            val_2 = operands.top();
-            operands.pop();
-            int c = 0;
-            c = val_1 + val_2;
-            operands.push(c);
-          }
-
-          if(V == "-")
-          {
-            val_1 = operands.top();        //cout<<buffer<<endl;
-
-            operands.pop();
-            val_2 = operands.top();
-            operands.pop();
-            int c = 0;
-            c = val_2 - val_1;
-            operands.push(c);
-          }
-
-          if(V == "*")
-          {
-            val_1 = operands.top();        //cout<<buffer<<endl;
-
-            operands.pop();
-            val_2 = operands.top();
-            operands.pop();
-            int c = 0;
-            c = val_1 * val_2;
-            operands.push(c);
-          }
-
-          if(V == "/")
-          {
-            val_1 = operands.top();
-            operands.pop();
-            val_2 = operands.top();
-            operands.pop();
-            int c = 0;
-          c = val_2 / val_1;
-          operands.push(c);
-          }
-}
-    }
-    //cout<<q;
-    cout<<operands.top()<<endl;
-}*/
-
-
-    /*
-    const array<string, 7> operators = {"+", "-", "*", "/", "^"};
-
-    stack<int> operands;
-
-    //stringstream convert;
-    int a, b, buffer;
-
-    for(const auto V: postfix)
-    {
-        if(find(operators.begin(), operators.end(), V) != operators.end() == false)
-          {
-          stringstream convert;
-        if(find(operators.begin(), operators.end(), V) != operators.end() == false)
-        {
-          stringstream convert;
-          convert << V;
-          convert >> buffer;
-          cout<<buffer<<endl;
-
-          operands.push(buffer);
-
-        }
-
-        else
-        {
-          if(V == "+")
-          {
-              a = operands.top();
-              operands.pop();
-              b = operands.top();
-              operands.pop();
-              int c = a+b;
-              //cout<<c<<endl;
-              operands.push(a + b);
-          }
-
-          if(V == "-")
-          {
-              a = operands.top();
-              operands.pop();
-              b = operands.top();
-              operands.pop();
-              int c = a+b;
-    /*stack<int> operands;
-
-    //stringstream convert;
-    int a, b, buffer;
-
-    stack<int> operands;
-
-    //stringstream convert;
-    int a, b, buffer;
-
-    for(const auto V: postfix)
-    {
-        if(find(operators.begin(), operators.end(), V) != operators.end() == false)
-        {
-          stringstream convert;
-          convert << V;
-          convert >> buffer;
-          cout<<buffer<<endl;
-
-          operands.push(buffer);
-
-        }
-
-        else
-        {
-          if(V == "+")
-          {
-              a = operands.top();
-              operands.pop();
-              b = operands.top();
-              operands.pop();
-              int c = a+b;
-            //cout<<c<<endl;
-          operands.push(a + b);
-*/
